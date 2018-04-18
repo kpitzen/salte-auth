@@ -1,6 +1,8 @@
 import defaultsDeep from 'lodash/defaultsDeep';
 import find from 'lodash/find';
 
+import { SalteAuthStorage } from './salte-auth.storage.js';
+
 /**
  * All the profile information associated with the current authentication session
  */
@@ -366,15 +368,19 @@ class SalteAuthProfile {
    * @ignore
    */
   $$transfer(source, destination) {
-    const sourceStorage = this.$$getStorage(source);
-    const destinationStorage = this.$$getStorage(destination);
+    const sourceStorage = new SalteAuthStorage(source);
+    const destinationStorage = new SalteAuthStorage(destination);
 
-    for (const key in sourceStorage) {
-      if (key.indexOf('salte.auth.') !== 0) continue;
+    return sourceStorage.all().then((values) => {
+      const promises = [];
+      for (let i = 0; i < values.length; i++) {
+        const value = values[i];
+        if (value.key.indexOf('salte.auth.') !== 0) continue;
 
-      destinationStorage.setItem(key, sourceStorage.getItem(key));
-      sourceStorage.removeItem(key);
-    }
+        promises.push(destinationStorage.set(value.key, value.value));
+      }
+      return Promise.all(promises);
+    });
   }
 
   /**

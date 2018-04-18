@@ -144,7 +144,8 @@ class SalteAuthUtilities {
   openPopup(url, name = 'salte-auth', height = 600, width = 400) {
     const top = ((window.innerHeight / 2) - (height / 2)) + window.screenTop;
     const left = ((window.innerWidth / 2) - (width / 2)) + window.screenLeft;
-    const popupWindow = window.open(url, name, `height=${height}, width=${width}, status=yes, toolbar=no, menubar=no, location=no, top=${top}, left=${left}`);
+    // const popupWindow = window.open(url, name, `height=${height}, width=${width}, status=yes, toolbar=no, menubar=no, location=no, top=${top}, left=${left}`);
+    const popupWindow = window.open(url, name, `height=${height}, width=${width}, top=${top}, left=${left}`);
     if (!popupWindow) {
       return Promise.reject(new ReferenceError('We were unable to open the popup window, its likely that the request was blocked.'));
     }
@@ -257,7 +258,7 @@ class SalteAuthUtilities {
    * @private
    */
   get $popup() {
-    if (window.opener && window.name === 'salte-auth') {
+    if (window.name === 'salte-auth') {
       return window;
     }
     return null;

@@ -90,10 +90,13 @@ class SalteAuth {
       parent.document.body.removeChild(this.$utilities.$iframe);
     } else if (this.$utilities.$popup) {
       // We need to utilize local storage to retain our parsed values
+      let promise = Promise.resolve();
       if (this.$config.storageType === 'session') {
-        this.profile.$$transfer('session', 'local');
+        promise = this.profile.$$transfer('session', 'indexeddb');
       }
-      setTimeout(this.$utilities.$popup.close);
+      promise.then(() => {
+        setTimeout(this.$utilities.$popup.close);
+      });
     } else if (this.profile.$redirectUrl && location.href !== this.profile.$redirectUrl) {
       const error = this.profile.$validate();
       if (error) {
@@ -348,19 +351,22 @@ class SalteAuth {
     this.$promises.login = this.$utilities.openPopup(this.$loginUrl).then(() => {
       this.$promises.login = null;
       // We need to utilize local storage to retain our parsed values
+      let promise = Promise.resolve();
       if (this.$config.storageType === 'session') {
-        this.profile.$$transfer('local', 'session');
+        promise = this.profile.$$transfer('indexeddb', 'session');
       }
-      const error = this.profile.$validate();
+      return promise.then(() => {
+        const error = this.profile.$validate();
 
-      if (error) {
-        this.profile.$clear();
-        return Promise.reject(error);
-      }
+        if (error) {
+          this.profile.$clear();
+          return Promise.reject(error);
+        }
 
-      const user = this.profile.userInfo;
-      this.$fire('login', null, user);
-      return user;
+        const user = this.profile.userInfo;
+        this.$fire('login', null, user);
+        return user;
+      });
     }).catch((error) => {
       this.$promises.login = null;
       this.$fire('login', error);
@@ -390,19 +396,22 @@ class SalteAuth {
     this.$promises.login = this.$utilities.openNewTab(this.$loginUrl).then(() => {
       this.$promises.login = null;
       // We need to utilize local storage to retain our parsed values
+      let promise = Promise.resolve();
       if (this.$config.storageType === 'session') {
-        this.profile.$$transfer('local', 'session');
+        promise = this.profile.$$transfer('indexeddb', 'session');
       }
-      const error = this.profile.$validate();
+      return promise.then(() => {
+        const error = this.profile.$validate();
 
-      if (error) {
-        this.profile.$clear();
-        return Promise.reject(error);
-      }
+        if (error) {
+          this.profile.$clear();
+          return Promise.reject(error);
+        }
 
-      const user = this.profile.userInfo;
-      this.$fire('login', null, user);
-      return user;
+        const user = this.profile.userInfo;
+        this.$fire('login', null, user);
+        return user;
+      });
     }).catch((error) => {
       this.$promises.login = null;
       this.$fire('login', error);
